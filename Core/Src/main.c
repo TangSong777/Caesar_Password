@@ -64,8 +64,8 @@ uint8_t Key_flag = 0; // 按键标志量
 uint8_t Morse_len = 0;
 uint8_t str_len = 0;
 uint8_t Space_num = 0;
-uint8_t Morse[50];
-uint8_t str[200];
+uint8_t Morse[50] = {0};
+uint8_t str[200] = {0};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -349,17 +349,17 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 								如果光信号长度不为0
 			const uint8_t i=0;
 			if(Bright_time==1)
-				Morse[i++]='a';Bright_time=0;
+				Morse[Morse_len++]='a';Bright_time=0;
 			else if(Bright_time==3)
-				Morse[i++]='b';Bright_time=0;
-								检测光信号长度 将其储存到凯撒代码数组中 清零光信号长度
-								如果为0 不进行处理
+				Morse[Morse_len++]='b';Bright_time=0;
 							}
 						else if(Dark_time == 3)
 							{
 								字符停顿
 								处理凯撒代码字符串
 				transform(Morse,str,Morse_len,str_len++);
+				Clear_array(Morse,Morse_len);
+                                Morse_len=0;
 								将凯撒代码转化成字符储存到字符串数组 清零储存凯撒代码的数组
 								如果凯撒代码数组已被清零 则不进行处理
 							}
@@ -372,7 +372,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 							}
 						else if(Dark_time > 7)
 							{
-								结束 删除字符串末尾的空格 处理密码 以要求形式打印字符串
+								结束 处理密码 以要求形式打印字符串
+	                                                        str[Morse_len-1]=0;
+	                                                        t=(str_len-Space_num)%7;
 								start_input = 0;
 							}
 					}
