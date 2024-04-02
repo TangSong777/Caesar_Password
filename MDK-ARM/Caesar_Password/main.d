@@ -36,4 +36,4 @@ caesar_password\main.o: ../Core/Inc/dma.h
 caesar_password\main.o: ../Core/Inc/tim.h
 caesar_password\main.o: ../Core/Inc/usart.h
 caesar_password\main.o: ../Core/Inc/gpio.h
-caesar_password\main.o: .\Users\KEY.h
+caesar_password\main.o: ./Users/KEY.h

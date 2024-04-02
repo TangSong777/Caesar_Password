@@ -29,13 +29,15 @@
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
+#define Bright GPIO_PIN_RESET
+#define Dark GPIO_PIN_SET
 /* USER CODE BEGIN PTD */
 typedef enum
 {
 	OUTPUT = 0,
 	EZINPUT = 1,
 	INPUT = 2
-} PUT_STATE; // 两种模式（通过按键切换）
+} PUT_STATE; // 两种模式（�?�过按键切换�?
 
 typedef enum
 {
@@ -58,12 +60,16 @@ typedef enum
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-PUT_STATE PutState = OUTPUT; // 默认为输出信号
+PUT_STATE PutState = OUTPUT; // 默认为输出信�?
 LED_STATE LedState = mode1;
-uint8_t Key_flag = 0; // 按键标志量
+uint8_t Key_flag = 0; // 按键标志�?
+uint8_t Bright_time = 0;
+uint8_t Dark_time = 0;
+uint8_t start_input = 0;
 uint8_t Morse_len = 0;
 uint8_t str_len = 0;
 uint8_t Space_num = 0;
+uint8_t t = 0;
 uint8_t Morse[50] = {0};
 uint8_t str[200] = {0};
 /* USER CODE END PV */
@@ -84,6 +90,12 @@ void Delay_break(uint16_t ms)
 			break;
 		HAL_Delay(10);
 	}
+}
+
+void Clear_array(uint8_t Morse[], uint8_t Morse_len)
+{
+	for (int temp = 0; temp < Morse_len; temp++)
+		Morse[temp] = 0;
 }
 
 int judge(uint8_t data[], const char a[], int len)
@@ -218,7 +230,7 @@ int main(void)
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
-		if (PutState == OUTPUT) // 当模式为‘发送信号模式时’
+		if (PutState == OUTPUT) // 当模式为‘发送信号模式时�?
 		{
 			if (Key_flag == 1)
 			{
@@ -228,7 +240,7 @@ int main(void)
 					LedState = 0;
 			}
 			else if (Key_flag == 3)
-				PutState = EZINPUT; // 长按切换为‘接收信号’模式
+				PutState = EZINPUT; // 长按切换为�?�接收信号�?�模�?
 
 			switch (LedState)
 			{
@@ -314,72 +326,75 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if (htim->Instance == TIM10) // 0.01s
 	{
-		if (PutState == OUTPUT || PutState == EZINPUT)
-			Key_pressscan(KEY0, &Key_flag);
-		if (PutState == EZINPUT)
+		switch (PutState)
 		{
+		case OUTPUT:
+		{
+			Key_pressscan(KEY0, &Key_flag);
+			break;
+		}
+		case EZINPUT:
+		{
+			Key_pressscan(KEY0, &Key_flag);
 			/*
-			接收光电二极管信号，当接收到亮信号时Bright_time++;暗信号时Dark_time++;
-			if(Bright_time == Dark_time && Bright_time == 100)
+		接收光电二极管信号，当接收到亮信号时Bright_time++;暗信号时Dark_time++;
+		if(Bright_time == Dark_time && Bright_time == 100)
+		{
+			printf("发起进攻");
+			Bright_time = 0;
+			Dark_time = 0;
+		}
+		*/
+			break;
+		}
+		case INPUT:
+		{
+			if (HAL_GPIO_ReadPin(Light_GPIO_Port, Light_Pin) == Bright)
 			{
-				printf("发起进攻");
-				Bright_time = 0;
+				if (start_input == 0)
+					start_input = 1;
+				Bright_time++;
 				Dark_time = 0;
 			}
-			*/
-		}
-		if (PutState == INPUT)
-		{
-			/*
-			uint8_t Bright_time = 0,Dark_time = 0,start_input = 0;
-			接收光电二极管信号，当接收到亮信号时Bright_time++;暗信号时Dark_time++;
-			if(亮信号)
+			else if (HAL_GPIO_ReadPin(Light_GPIO_Port, Light_Pin) == Dark)
+			{
+				Dark_time++;
+				switch (Dark_time)
 				{
-					if(start_input == 0)start_input = 1;//发送第一个光信号的时候视为开始发送
-					Bright_time++;
-					Dark_time = 0;
-				}
-			if(start_input == 1)
+				case 1:
 				{
-				if(暗信号)
+					if (Bright_time == 1)
 					{
-						Dark_time++；
-						if(Dark_time == 1)
-							{
-								如果光信号长度不为0
-			const uint8_t i=0;
-			if(Bright_time==1)
-				Morse[Morse_len++]='a';Bright_time=0;
-			else if(Bright_time==3)
-				Morse[Morse_len++]='b';Bright_time=0;
-							}
-						else if(Dark_time == 3)
-							{
-								字符停顿
-								处理凯撒代码字符串
-				transform(Morse,str,Morse_len,str_len++);
-				Clear_array(Morse,Morse_len);
-                                Morse_len=0;
-								将凯撒代码转化成字符储存到字符串数组 清零储存凯撒代码的数组
-								如果凯撒代码数组已被清零 则不进行处理
-							}
-						else if(Dark_time == 7)
-							{
-								单词停顿
-								str[Morse_len++]=' ';
-								Space_num++;
-								如果字符串数组最后一个字符不为空格 字符串数组后加一个空格 清零光信号长度 清零储存凯撒代码的数组
-							}
-						else if(Dark_time > 7)
-							{
-								结束 处理密码 以要求形式打印字符串
-	                                                        str[Morse_len-1]=0;
-	                                                        t=(str_len-Space_num)%7;
-								start_input = 0;
-							}
+						Morse[Morse_len++] = 'a';
+						Bright_time = 0;
 					}
+					else if (Bright_time == 3)
+					{
+						Morse[Morse_len++] = 'b';
+						Bright_time = 0;
+					}
+					break;
 				}
-			*/
+				case 3:
+				{
+					transform(Morse, str, Morse_len, str_len++);
+					Clear_array(Morse, Morse_len);
+					Morse_len = 0;
+				}
+				case 7:
+				{
+					str[Morse_len++] = ' ';
+					Space_num++;
+				}
+				}
+				if (Dark_time > 7)
+				{
+					str[Morse_len - 1] = 0;
+					t = (str_len - Space_num) % 7;
+					start_input = 0;
+				}
+			}
+		}
 		}
 	}
 }
