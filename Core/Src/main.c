@@ -37,7 +37,7 @@ typedef enum
 	OUTPUT = 0,
 	EZINPUT = 1,
 	INPUT = 2
-} PUT_STATE; // 两种模式（�?�过按键切换�?
+} PUT_STATE; // 两种模式（�?�过按键切换�??
 
 typedef enum
 {
@@ -60,11 +60,11 @@ typedef enum
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-PUT_STATE PutState = OUTPUT; // 默认为输出信�?
+PUT_STATE PutState = OUTPUT; // 默认为输出信�??
 LED_STATE LedState = mode1;
-uint8_t Key_flag = 0; // 按键标志�?
-uint8_t Bright_time = 0;
-uint8_t Dark_time = 0;
+uint8_t Key_flag = 0; // 按键标志�??
+uint32_t Bright_time = 0;
+uint32_t Dark_time = 0;
 uint8_t start_input = 0;
 uint8_t Morse_len = 0;
 uint8_t str_len = 0;
@@ -96,6 +96,17 @@ void Clear_array(uint8_t Morse[], uint8_t Morse_len)
 {
 	for (int temp = 0; temp < Morse_len; temp++)
 		Morse[temp] = 0;
+}
+
+void Transform_password(uint8_t str[], uint8_t str_len, uint8_t t)
+{
+	for (int i = 0; i < str_len; i++)
+	{
+		if (str[i] >= 'a' && str[i] <= 'z')
+		{
+			str[i] = (str[i] - 'a' - t + 26) % 26 + 'a';
+		}
+	};
 }
 
 int judge(uint8_t data[], const char a[], int len)
@@ -230,7 +241,7 @@ int main(void)
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
-		if (PutState == OUTPUT) // 当模式为‘发送信号模式时�?
+		if (PutState == OUTPUT) // 当模式为‘发送信号模式时�??
 		{
 			if (Key_flag == 1)
 			{
@@ -240,7 +251,7 @@ int main(void)
 					LedState = 0;
 			}
 			else if (Key_flag == 3)
-				PutState = EZINPUT; // 长按切换为�?�接收信号�?�模�?
+				PutState = EZINPUT; // 长按切换为�?�接收信号�?�模�??
 
 			switch (LedState)
 			{
@@ -269,9 +280,6 @@ int main(void)
 				break;
 			}
 			}
-		}
-		if (PutState == EZINPUT)
-		{
 		}
 	}
 	/* USER CODE END 3 */
@@ -336,17 +344,40 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		case EZINPUT:
 		{
 			Key_pressscan(KEY0, &Key_flag);
-			/*
-		接收光电二极管信号，当接收到亮信号时Bright_time++;暗信号时Dark_time++;
-		if(Bright_time == Dark_time && Bright_time == 100)
-		{
-			printf("发起进攻");
-			Bright_time = 0;
-			Dark_time = 0;
-		}
-		*/
+			if (HAL_GPIO_ReadPin(Light_GPIO_Port, Light_Pin) == Bright)
+				Bright_time++;
+			if (HAL_GPIO_ReadPin(Light_GPIO_Port, Light_Pin) == Dark)
+				Dark_time++;
+			if (Bright_time == Dark_time)
+			{
+				switch (Bright_time)
+				{
+				case 100:
+				{
+					printf("Fight!\r\n");
+					Bright_time = 0;
+					Dark_time = 0;
+					break;
+				}
+				case 200:
+				{
+					printf("Retreat!\r\n");
+					Bright_time = 0;
+					Dark_time = 0;
+					break;
+				}
+				case 300:
+				{
+					printf("Come to me!\r\n");
+					Bright_time = 0;
+					Dark_time = 0;
+					break;
+				}
+				}
+			}
 			break;
 		}
+
 		case INPUT:
 		{
 			if (HAL_GPIO_ReadPin(Light_GPIO_Port, Light_Pin) == Bright)
@@ -383,7 +414,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				}
 				case 7:
 				{
-					str[Morse_len++] = ' ';
+					str[str_len++] = ' ';
 					Space_num++;
 				}
 				}
@@ -391,6 +422,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				{
 					str[Morse_len - 1] = 0;
 					t = (str_len - Space_num) % 7;
+					Transform_password(str, str_len, t);
+					for (int i = 0; i < str_len - 2; i++)
+					{
+						printf("%c", str[i]);
+					}
+					printf(".\r\n");
 					start_input = 0;
 				}
 			}
