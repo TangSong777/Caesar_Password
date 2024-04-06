@@ -37,7 +37,7 @@ typedef enum
 	OUTPUT = 0,
 	EZINPUT = 1,
 	INPUT = 2
-} PUT_STATE; // 两种模式（�?�过按键切换�??
+} PUT_STATE; // 三种模式(通过长按切换)
 
 typedef enum
 {
@@ -60,18 +60,19 @@ typedef enum
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-PUT_STATE PutState = OUTPUT; // 默认为输出信�??
+PUT_STATE PutState = OUTPUT; // 默认为输出信号模式
 LED_STATE LedState = mode1;
-uint8_t Key_flag = 0; // 按键标志�??
-uint32_t Bright_time = 0;
-uint32_t Dark_time = 0;
-uint8_t start_input = 0;
-uint8_t Morse_len = 0;
-uint8_t str_len = 0;
-uint8_t Space_num = 0;
-uint8_t t = 0;
-uint8_t Morse[50] = {0};
-uint8_t str[200] = {0};
+uint8_t Key_flag = 0;	   // 按键标志定义
+uint32_t Bright_time = 0;  // 代表亮起的单位时间
+uint32_t Dark_time = 0;	   // 代表熄灭的单位时间
+uint8_t Start_ezinput = 0; // 定义开始接受标志
+uint8_t Start_input = 0;   // 定义开始接受标志
+uint8_t Morse_len = 0;	   // 定义摩尔斯密码长度
+uint8_t Str_len = 0;	   // 定义字符串长度
+uint8_t Space_num = 0;	   // 定义字符串中的空格数
+uint8_t T = 0;			   // 定义t
+uint8_t Morse[50] = {0};   // 定义数组储存摩尔斯密码
+uint8_t Str[200] = {0};	   // 定义数组储存字符串
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -92,10 +93,10 @@ void Delay_break(uint16_t ms)
 	}
 }
 
-void Clear_array(uint8_t Morse[], uint8_t Morse_len)
+void Clear_array(uint8_t morse[], uint8_t morse_len)
 {
-	for (int temp = 0; temp < Morse_len; temp++)
-		Morse[temp] = 0;
+	for (int temp = 0; temp < morse_len; temp++)
+		morse[temp] = 0;
 }
 
 void Transform_password(uint8_t str[], uint8_t str_len, uint8_t t)
@@ -109,7 +110,7 @@ void Transform_password(uint8_t str[], uint8_t str_len, uint8_t t)
 	};
 }
 
-int judge(uint8_t data[], const char a[], int len)
+int Judge(uint8_t data[], const char a[], int len)
 {
 	for (int i = 0; i < len; i++)
 	{
@@ -121,76 +122,76 @@ int judge(uint8_t data[], const char a[], int len)
 	return 1;
 }
 
-void transform(uint8_t Morse[], uint8_t str[], uint8_t Morse_len, uint8_t i)
+void Transform(uint8_t morse[], uint8_t str[], uint8_t morse_len, uint8_t str_len)
 {
-	switch (Morse_len)
+	switch (morse_len)
 	{
 	case 1:
 	{
-		if (judge(Morse, "a", 1))
-			str[i] = 'e';
-		if (judge(Morse, "b", 1))
-			str[i] = 't';
+		if (judge(morse, ".", 1))
+			str[str_len] = 'e';
+		if (judge(morse, "-", 1))
+			str[str_len] = 't';
 		break;
 	}
 	case 2:
 	{
-		if (judge(Morse, "ab", 2))
-			str[i] = 'a';
-		if (judge(Morse, "aa", 2))
-			str[i] = 'i';
-		if (judge(Morse, "bb", 2))
-			str[i] = 'm';
-		if (judge(Morse, "ba", 2))
-			str[i] = 'n';
+		if (judge(morse, ".-", 2))
+			str[str_len] = 'a';
+		if (judge(morse, "..", 2))
+			str[str_len] = 'i';
+		if (judge(morse, "--", 2))
+			str[str_len] = 'm';
+		if (judge(morse, "-.", 2))
+			str[str_len] = 'n';
 		break;
 	}
 	case 3:
 	{
-		if (judge(Morse, "baa", 3))
-			str[i] = 'd';
-		if (judge(Morse, "bba", 3))
-			str[i] = 'g';
-		if (judge(Morse, "bab", 3))
-			str[i] = 'k';
-		if (judge(Morse, "bbb", 3))
-			str[i] = 'o';
-		if (judge(Morse, "aba", 3))
-			str[i] = 'r';
-		if (judge(Morse, "aaa", 3))
-			str[i] = 's';
-		if (judge(Morse, "aab", 3))
-			str[i] = 'u';
-		if (judge(Morse, "abb", 3))
-			str[i] = 'w';
+		if (judge(morse, "-..", 3))
+			str[str_len] = 'd';
+		if (judge(morse, "--.", 3))
+			str[str_len] = 'g';
+		if (judge(morse, "-.-", 3))
+			str[str_len] = 'k';
+		if (judge(morse, "---", 3))
+			str[str_len] = 'o';
+		if (judge(morse, ".-.", 3))
+			str[str_len] = 'r';
+		if (judge(morse, "...", 3))
+			str[str_len] = 's';
+		if (judge(morse, "..-", 3))
+			str[str_len] = 'u';
+		if (judge(morse, ".--", 3))
+			str[str_len] = 'w';
 		break;
 	}
 	case 4:
 	{
-		if (judge(Morse, "baaa", 4))
-			str[i] = 'b';
-		if (judge(Morse, "baba", 4))
-			str[i] = 'c';
-		if (judge(Morse, "aaba", 4))
-			str[i] = 'f';
-		if (judge(Morse, "aaaa", 4))
-			str[i] = 'h';
-		if (judge(Morse, "abbb", 4))
-			str[i] = 'j';
-		if (judge(Morse, "abaa", 4))
-			str[i] = 'l';
-		if (judge(Morse, "abba", 4))
-			str[i] = 'p';
-		if (judge(Morse, "bbab", 4))
-			str[i] = 'q';
-		if (judge(Morse, "aaab", 4))
-			str[i] = 'v';
-		if (judge(Morse, "baab", 4))
-			str[i] = 'x';
-		if (judge(Morse, "babb", 4))
-			str[i] = 'y';
-		if (judge(Morse, "bbaa", 4))
-			str[i] = 'z';
+		if (judge(morse, "-...", 4))
+			str[str_len] = 'b';
+		if (judge(morse, "-.-.", 4))
+			str[str_len] = 'c';
+		if (judge(morse, "..-.", 4))
+			str[str_len] = 'f';
+		if (judge(morse, "....", 4))
+			str[str_len] = 'h';
+		if (judge(morse, ".---", 4))
+			str[str_len] = 'j';
+		if (judge(morse, ".-..", 4))
+			str[str_len] = 'l';
+		if (judge(morse, ".--.", 4))
+			str[str_len] = 'p';
+		if (judge(morse, "--.-", 4))
+			str[str_len] = 'q';
+		if (judge(morse, "...-", 4))
+			str[str_len] = 'v';
+		if (judge(morse, "-..-", 4))
+			str[str_len] = 'x';
+		if (judge(morse, "-.--", 4))
+			str[str_len] = 'y';
+		if (judge(morse, "--..", 4))
+			str[str_len] = 'z';
 		break;
 	}
 	}
@@ -241,7 +242,7 @@ int main(void)
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
-		if (PutState == OUTPUT) // 当模式为‘发送信号模式时�??
+		if (PutState == OUTPUT) // 当模式为发送信号模式时
 		{
 			if (Key_flag == 1)
 			{
@@ -251,7 +252,7 @@ int main(void)
 					LedState = 0;
 			}
 			else if (Key_flag == 3)
-				PutState = EZINPUT; // 长按切换为�?�接收信号�?�模�??
+				PutState = EZINPUT; // 长按切换为接受信号模式
 
 			switch (LedState)
 			{
@@ -345,8 +346,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		{
 			Key_pressscan(KEY0, &Key_flag);
 			if (HAL_GPIO_ReadPin(Light_GPIO_Port, Light_Pin) == Bright)
+			{
 				Bright_time++;
-			if (HAL_GPIO_ReadPin(Light_GPIO_Port, Light_Pin) == Dark)
+				Start_ezinput = 1;
+			}
+			if (HAL_GPIO_ReadPin(Light_GPIO_Port, Light_Pin) == Dark && Start_ezinput)
 				Dark_time++;
 			if (Bright_time == Dark_time)
 			{
@@ -357,6 +361,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					printf("Fight!\r\n");
 					Bright_time = 0;
 					Dark_time = 0;
+					Start_ezinput = 0;
 					break;
 				}
 				case 200:
@@ -364,6 +369,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					printf("Retreat!\r\n");
 					Bright_time = 0;
 					Dark_time = 0;
+					Start_ezinput = 0;
 					break;
 				}
 				case 300:
@@ -371,6 +377,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					printf("Come to me!\r\n");
 					Bright_time = 0;
 					Dark_time = 0;
+					Start_ezinput = 0;
 					break;
 				}
 				}
@@ -382,12 +389,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		{
 			if (HAL_GPIO_ReadPin(Light_GPIO_Port, Light_Pin) == Bright)
 			{
-				if (start_input == 0)
-					start_input = 1;
+				if (Start_input == 0)
+					Start_input = 1;
 				Bright_time++;
 				Dark_time = 0;
 			}
-			else if (HAL_GPIO_ReadPin(Light_GPIO_Port, Light_Pin) == Dark)
+			else if (HAL_GPIO_ReadPin(Light_GPIO_Port, Light_Pin) == Dark && start_input)
 			{
 				Dark_time++;
 				switch (Dark_time)
@@ -396,39 +403,39 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				{
 					if (Bright_time == 1)
 					{
-						Morse[Morse_len++] = 'a';
+						Morse[Morse_len++] = '.';
 						Bright_time = 0;
 					}
 					else if (Bright_time == 3)
 					{
-						Morse[Morse_len++] = 'b';
+						Morse[Morse_len++] = '-';
 						Bright_time = 0;
 					}
 					break;
 				}
 				case 3:
 				{
-					transform(Morse, str, Morse_len, str_len++);
+					transform(Morse, Str, Morse_len, Str_len++);
 					Clear_array(Morse, Morse_len);
 					Morse_len = 0;
 				}
 				case 7:
 				{
-					str[str_len++] = ' ';
+					Str[Str_len++] = ' ';
 					Space_num++;
 				}
 				}
 				if (Dark_time > 7)
 				{
 					str[Morse_len - 1] = 0;
-					t = (str_len - Space_num) % 7;
-					Transform_password(str, str_len, t);
-					for (int i = 0; i < str_len - 2; i++)
+					T = (Str_len - Space_num) % 7;
+					Transform_password(Str, Str_len, T);
+					for (int i = 0; i < Str_len - 2; i++)
 					{
-						printf("%c", str[i]);
+						printf("%c", Str[i]);
 					}
 					printf(".\r\n");
-					start_input = 0;
+					Start_input = 0;
 				}
 			}
 		}
