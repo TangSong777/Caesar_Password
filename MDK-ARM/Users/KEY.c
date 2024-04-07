@@ -41,7 +41,7 @@ typedef struct
 	uint8_t Time;
 	uint8_t Press;
 	uint8_t PressTime;
-	uint8_t Count;
+	int Count;
 } KEY_TypeDef;
 
 static KEY_TypeDef Keys[KEYn] = {0};

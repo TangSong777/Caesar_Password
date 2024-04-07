@@ -29,8 +29,6 @@
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
-#define Bright GPIO_PIN_RESET
-#define Dark GPIO_PIN_SET
 /* USER CODE BEGIN PTD */
 typedef enum
 {
@@ -49,7 +47,8 @@ typedef enum
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define Bright GPIO_PIN_RESET
+#define Dark GPIO_PIN_SET
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -259,24 +258,29 @@ int main(void)
 			case mode1:
 			{
 				HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(Light_output_GPIO_Port, Light_output_Pin, GPIO_PIN_SET);
 				Delay_break(1000);
 				HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(Light_output_GPIO_Port, Light_output_Pin, GPIO_PIN_RESET);
 				Delay_break(1000);
-				break;
 			}
 			case mode2:
 			{
 				HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(Light_output_GPIO_Port, Light_output_Pin, GPIO_PIN_SET);
 				Delay_break(2000);
 				HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(Light_output_GPIO_Port, Light_output_Pin, GPIO_PIN_RESET);
 				Delay_break(2000);
 				break;
 			}
 			case mode3:
 			{
 				HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(Light_output_GPIO_Port, Light_output_Pin, GPIO_PIN_SET);
 				Delay_break(3000);
 				HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(Light_output_GPIO_Port, Light_output_Pin, GPIO_PIN_RESET);
 				Delay_break(3000);
 				break;
 			}
@@ -345,12 +349,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		case EZINPUT:
 		{
 			Key_pressscan(KEY0, &Key_flag);
-			if (HAL_GPIO_ReadPin(Light_GPIO_Port, Light_Pin) == Bright)
+			if (HAL_GPIO_ReadPin(Light_input_GPIO_Port, Light_input_Pin) == Bright)
 			{
 				Bright_time++;
 				Start_ezinput = 1;
 			}
-			if (HAL_GPIO_ReadPin(Light_GPIO_Port, Light_Pin) == Dark && Start_ezinput)
+			if (HAL_GPIO_ReadPin(Light_input_GPIO_Port, Light_input_Pin) == Dark && Start_ezinput)
 				Dark_time++;
 			if (Bright_time == Dark_time)
 			{
@@ -387,14 +391,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 		case INPUT:
 		{
-			if (HAL_GPIO_ReadPin(Light_GPIO_Port, Light_Pin) == Bright)
+			if (HAL_GPIO_ReadPin(Light_input_GPIO_Port, Light_input_Pin) == Bright)
 			{
 				if (Start_input == 0)
 					Start_input = 1;
 				Bright_time++;
 				Dark_time = 0;
 			}
-			else if (HAL_GPIO_ReadPin(Light_GPIO_Port, Light_Pin) == Dark && start_input)
+			else if (HAL_GPIO_ReadPin(Light_input_GPIO_Port, Light_input_Pin) == Dark && Start_input)
 			{
 				Dark_time++;
 				switch (Dark_time)
@@ -415,7 +419,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				}
 				case 3:
 				{
-					transform(Morse, Str, Morse_len, Str_len++);
+					Transform(Morse, Str, Morse_len, Str_len++);
 					Clear_array(Morse, Morse_len);
 					Morse_len = 0;
 				}
@@ -427,7 +431,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				}
 				if (Dark_time > 7)
 				{
-					str[Morse_len - 1] = 0;
+					Str[Morse_len - 1] = 0;
 					T = (Str_len - Space_num) % 7;
 					Transform_password(Str, Str_len, T);
 					for (int i = 0; i < Str_len - 2; i++)
