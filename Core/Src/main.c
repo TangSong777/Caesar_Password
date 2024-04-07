@@ -128,69 +128,69 @@ void Transform(uint8_t morse[], uint8_t str[], uint8_t morse_len, uint8_t str_le
 	{
 	case 1:
 	{
-		if (judge(morse, ".", 1))
+		if (Judge(morse, ".", 1))
 			str[str_len] = 'e';
-		if (judge(morse, "-", 1))
+		if (Judge(morse, "-", 1))
 			str[str_len] = 't';
 		break;
 	}
 	case 2:
 	{
-		if (judge(morse, ".-", 2))
+		if (Judge(morse, ".-", 2))
 			str[str_len] = 'a';
-		if (judge(morse, "..", 2))
+		if (Judge(morse, "..", 2))
 			str[str_len] = 'i';
-		if (judge(morse, "--", 2))
+		if (Judge(morse, "--", 2))
 			str[str_len] = 'm';
-		if (judge(morse, "-.", 2))
+		if (Judge(morse, "-.", 2))
 			str[str_len] = 'n';
 		break;
 	}
 	case 3:
 	{
-		if (judge(morse, "-..", 3))
+		if (Judge(morse, "-..", 3))
 			str[str_len] = 'd';
-		if (judge(morse, "--.", 3))
+		if (Judge(morse, "--.", 3))
 			str[str_len] = 'g';
-		if (judge(morse, "-.-", 3))
+		if (Judge(morse, "-.-", 3))
 			str[str_len] = 'k';
-		if (judge(morse, "---", 3))
+		if (Judge(morse, "---", 3))
 			str[str_len] = 'o';
-		if (judge(morse, ".-.", 3))
+		if (Judge(morse, ".-.", 3))
 			str[str_len] = 'r';
-		if (judge(morse, "...", 3))
+		if (Judge(morse, "...", 3))
 			str[str_len] = 's';
-		if (judge(morse, "..-", 3))
+		if (Judge(morse, "..-", 3))
 			str[str_len] = 'u';
-		if (judge(morse, ".--", 3))
+		if (Judge(morse, ".--", 3))
 			str[str_len] = 'w';
 		break;
 	}
 	case 4:
 	{
-		if (judge(morse, "-...", 4))
+		if (Judge(morse, "-...", 4))
 			str[str_len] = 'b';
-		if (judge(morse, "-.-.", 4))
+		if (Judge(morse, "-.-.", 4))
 			str[str_len] = 'c';
-		if (judge(morse, "..-.", 4))
+		if (Judge(morse, "..-.", 4))
 			str[str_len] = 'f';
-		if (judge(morse, "....", 4))
+		if (Judge(morse, "....", 4))
 			str[str_len] = 'h';
-		if (judge(morse, ".---", 4))
+		if (Judge(morse, ".---", 4))
 			str[str_len] = 'j';
-		if (judge(morse, ".-..", 4))
+		if (Judge(morse, ".-..", 4))
 			str[str_len] = 'l';
-		if (judge(morse, ".--.", 4))
+		if (Judge(morse, ".--.", 4))
 			str[str_len] = 'p';
-		if (judge(morse, "--.-", 4))
+		if (Judge(morse, "--.-", 4))
 			str[str_len] = 'q';
-		if (judge(morse, "...-", 4))
+		if (Judge(morse, "...-", 4))
 			str[str_len] = 'v';
-		if (judge(morse, "-..-", 4))
+		if (Judge(morse, "-..-", 4))
 			str[str_len] = 'x';
-		if (judge(morse, "-.--", 4))
+		if (Judge(morse, "-.--", 4))
 			str[str_len] = 'y';
-		if (judge(morse, "--..", 4))
+		if (Judge(morse, "--..", 4))
 			str[str_len] = 'z';
 		break;
 	}
